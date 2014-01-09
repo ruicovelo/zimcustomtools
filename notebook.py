@@ -1,4 +1,4 @@
-from zim.notebook import Page,get_notebook
+from zim.notebook import Path,Page,get_notebook
 import re
 
 def get_ctnotebook(path):
@@ -18,7 +18,27 @@ class NotebookWrapper(Wrapper):
         
     def get_page(self,path):
         return PageWrapper(self.obj.get_page(path))
-        
+    
+    def _list_contains(self,haystack_headers,needle_headers):
+        for header in needle_headers:
+            if header in haystack_headers:
+                return True
+        return False
+
+    def select_pagelist(self,path,include_headers,exclude_headers=None):
+        page_list = self.get_pagelist(Path(path))
+        selected_pagelist = []
+        for page in page_list:
+            page = PageWrapper(page)
+            headers = page.get_headers()
+            if headers:
+                if exclude_headers and self._list_contains(headers,exclude_headers):
+                    continue
+                if include_headers:
+                    if include_headers and self._list_contains(headers,include_headers):
+                        selected_pagelist.append(page)
+        return selected_pagelist
+
 class PageWrapper(Wrapper):
     
     def _get_headers(self,lines):
