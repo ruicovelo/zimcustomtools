@@ -70,3 +70,15 @@ class PageWrapper(Wrapper):
         except IOError:
             return None
         return self._get_headers(lines)
+
+    def create(self,notebook,text=''):
+        '''
+        Create a new page using the default template
+        '''
+	template = notebook.get_template(self)
+	tree = template.process_to_parsetree(notebook, self)
+        self.set_parsetree(tree)
+	self.parse('wiki', text, append=True) # FIXME format hard coded
+	notebook.store_page(self)
+        notebook.emit('stored-page',Path(self.name))
+        
